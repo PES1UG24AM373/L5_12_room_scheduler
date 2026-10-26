@@ -13,8 +13,12 @@ equipment_pool = {"projector": 2, "microphone": 4, "webcam": 1}
 conflicts = []
 _RESERVATION_IDS = itertools.count(1)
 
+
 def schedule_room(room_id, time_slot, equipment_list=None):
-    """Book a room for a slot, reserve equipment and return the reservation id."""
+    """Book a room for a slot and reserve equipment.
+
+    Returns the new reservation id.
+    """
     if equipment_list is None:
         equipment_list = []
     for reservation in reservations.values():
@@ -27,6 +31,7 @@ def schedule_room(room_id, time_slot, equipment_list=None):
         "room": room_id, "slot": time_slot, "equipment": equipment_list}
     return reservation_id
 
+
 def cancel_reservation(reservation_id):
     """Cancel a reservation and return its equipment to the pool."""
     reservation = reservations.pop(reservation_id, None)
@@ -36,15 +41,18 @@ def cancel_reservation(reservation_id):
     for e in reservation["equipment"]:
         equipment_pool[e] += 1
 
+
 def slot_hours(time_slot):
     """Return the length in hours of a slot written like '09-11'."""
     start, end = time_slot.split("-")
     return int(end) - int(start)
 
+
 def export_schedule(file="schedule.json"):
     """Write all reservations to a JSON file."""
     with open(file, "w", encoding="utf-8") as f:
         f.write(json.dumps(reservations))
+
 
 def log_conflicts(file="conflicts.log"):
     """Append recorded conflicts to a log file, then print the whole log."""
@@ -53,6 +61,7 @@ def log_conflicts(file="conflicts.log"):
             f.write(f"{datetime.now()} {c}\n")
     with open(file, encoding="utf-8") as f:
         print(f.read(), end="")
+
 
 def main():
     """Run a short demonstration of the scheduler."""
@@ -68,6 +77,7 @@ def main():
     log_conflicts()
     print("Equipment left:", equipment_pool)
     print("Reservations:", reservations)
+
 
 if __name__ == "__main__":
     main()
