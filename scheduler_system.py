@@ -1,5 +1,4 @@
 import json
-import os
 from datetime import datetime
 
 # Global state
@@ -20,12 +19,12 @@ def schedule_room(room_id, time_slot, equipment_list=[]):
     return next_reservation - 1
 
 def cancel_reservation(reservation_id):
-    try:
-        for e in reservations[reservation_id]["equipment"]:
-            equipment_pool[e] += 1
-        del reservations[reservation_id]
-    except:
-        pass
+    reservation = reservations.pop(reservation_id, None)
+    if reservation is None:
+        print("No reservation with id %s to cancel" % reservation_id)
+        return
+    for e in reservation["equipment"]:
+        equipment_pool[e] += 1
 
 def slot_hours(time_slot):
     start, end = time_slot.split("-")
@@ -37,10 +36,11 @@ def export_schedule(file="schedule.json"):
     f.close()
 
 def logConflicts(file="conflicts.log"):
-    f = open(file, "a")
-    for c in conflicts:
-        f.write(str(datetime.now()) + " " + c + "\n")
-    os.system("cat " + file)
+    with open(file, "a") as f:
+        for c in conflicts:
+            f.write(str(datetime.now()) + " " + c + "\n")
+    with open(file) as f:
+        print(f.read(), end="")
 
 def main():
     a = schedule_room("Board-1", "09-11")
